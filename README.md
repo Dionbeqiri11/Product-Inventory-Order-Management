@@ -193,13 +193,20 @@ curl -X POST http://localhost:8080/api/v1/orders \
 ## Testing
 
 ```bash
-cd backend && npm test
+cd backend && npm test     # API: Vitest + supertest + in-memory MongoDB
+cd frontend && npm test    # Web: Vitest + React Testing Library (jsdom)
 ```
 
-Tests run against an in-memory MongoDB (`mongodb-memory-server`), so no external
-database is required. Coverage includes auth flows, product CRUD + validation,
-order placement, stock decrement, multi-line compensation, user scoping, and the
-concurrency oversell guard.
+**Backend** tests run against an in-memory MongoDB (`mongodb-memory-server`), so no
+external database is required. Coverage includes auth flows, product CRUD +
+validation, role permissions, order placement, stock decrement, multi-line
+compensation, user scoping, pagination, and the concurrency oversell guard.
+
+**Frontend** tests cover the API client (token handling, error propagation), the
+auth form (sign-in/register toggle, submit, error display), and the dashboard
+(role-based UI, ordering controls, pagination).
+
+Both suites run on every push via GitHub Actions (`.github/workflows/ci.yml`).
 
 ---
 
