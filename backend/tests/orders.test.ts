@@ -11,6 +11,18 @@ describe('orders', () => {
     adminToken = await createAdminAndLogin();
   });
 
+  it('forbids admins from placing orders', async () => {
+    const { id } = await createProduct(adminToken, { sku: 'ADMIN-NOORDER', stock: 5 });
+    const res = await request(app)
+      .post('/api/v1/orders')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ items: [{ productId: id, quantity: 1 }] });
+    expect(res.status).toBe(403);
+
+    const product = await ProductModel.findById(id);
+    expect(product?.stock).toBe(5);
+  });
+
   it('creates an order and decrements stock', async () => {
     const { id } = await createProduct(adminToken, { priceCents: 500, stock: 10 });
 
