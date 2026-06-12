@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { api, setToken } from '../api';
+import { api, setToken, setStoredUser } from '../api';
 import type { AuthUser } from '../types';
 
 interface Props {
@@ -24,6 +24,7 @@ export function AuthPanel({ onAuthenticated }: Props) {
           ? await api.login({ email, password })
           : await api.register({ name, email, password });
       setToken(result.token);
+      setStoredUser(result.user);
       onAuthenticated(result.user);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');

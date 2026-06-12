@@ -14,6 +14,16 @@ export function getToken(): string | null {
   return authToken;
 }
 
+export function setStoredUser(user: AuthUser | null): void {
+  if (user) localStorage.setItem('user', JSON.stringify(user));
+  else localStorage.removeItem('user');
+}
+
+export function getStoredUser(): AuthUser | null {
+  const raw = localStorage.getItem('user');
+  return raw ? (JSON.parse(raw) as AuthUser) : null;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (authToken) headers.Authorization = `Bearer ${authToken}`;

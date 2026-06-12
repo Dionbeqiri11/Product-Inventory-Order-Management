@@ -3,7 +3,7 @@ import { api } from '../api';
 import { formatPrice } from '../format';
 import type { Order, Product } from '../types';
 
-export function Dashboard() {
+export function Dashboard({ isAdmin = false }: { isAdmin?: boolean }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cart, setCart] = useState<Record<string, number>>({});
@@ -89,7 +89,7 @@ export function Dashboard() {
         <button onClick={placeOrder}>Place order</button>
       </section>
 
-      <CreateProduct onCreated={refresh} />
+      {isAdmin && <CreateProduct onCreated={refresh} />}
 
       <section className="card">
         <h2>Your orders</h2>
