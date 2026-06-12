@@ -14,6 +14,8 @@ const envSchema = z.object({
   LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),
+  // Comma-separated list of allowed browser origins for CORS.
+  CORS_ORIGIN: z.string().default('http://localhost:5173,http://localhost:8080'),
   // Optional bootstrap admin, seeded on startup if both are provided.
   ADMIN_EMAIL: z.string().email().optional(),
   ADMIN_PASSWORD: z.string().min(8).optional(),
