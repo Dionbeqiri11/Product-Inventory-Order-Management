@@ -6,6 +6,7 @@ import { logger } from './config/logger';
 import { healthRouter } from './api/health/health.routes';
 import { authRouter } from './api/auth/auth.routes';
 import { productRouter } from './api/products/product.routes';
+import { orderRouter } from './api/orders/order.routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 /**
@@ -23,6 +24,7 @@ export function createApp(): Express {
   app.use('/health', healthRouter);
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/products', productRouter);
+  app.use('/api/v1/orders', orderRouter);
 
   // 404 + centralized error handling must be registered last.
   app.use(notFoundHandler);

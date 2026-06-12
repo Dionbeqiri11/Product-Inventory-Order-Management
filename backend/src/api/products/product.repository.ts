@@ -25,4 +25,24 @@ export const productRepository = {
   delete(id: string): Promise<ProductDocument | null> {
     return ProductModel.findByIdAndDelete(id).exec();
   },
+
+  /**
+   * Atomically decrement stock iff at least `quantity` is available. The
+   * `stock: { $gte: quantity }` guard and `$inc` happen as a single atomic
+   * document update in MongoDB, so concurrent reservations can never drive
+   * stock negative (no overselling). Returns the updated product, or null when
+   * the product does not exist or has insufficient stock.
+   */
+  reserveStock(id: string, quantity: number): Promise<ProductDocument | null> {
+    return ProductModel.findOneAndUpdate(
+      { _id: id, stock: { $gte: quantity } },
+      { $inc: { stock: -quantity } },
+      { new: true },
+    ).exec();
+  },
+
+  /** Compensating action: return previously reserved stock to a product. */
+  releaseStock(id: string, quantity: number): Promise<ProductDocument | null> {
+    return ProductModel.findByIdAndUpdate(id, { $inc: { stock: quantity } }, { new: true }).exec();
+  },
 };
