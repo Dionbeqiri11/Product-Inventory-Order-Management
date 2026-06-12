@@ -8,19 +8,28 @@ export interface AuthResult {
   user: UserDocument;
 }
 
+function issue(user: UserDocument): AuthResult {
+  return {
+    token: signToken({ sub: String(user._id), email: user.email, role: user.role }),
+    user,
+  };
+}
+
 export const authService = {
   async register(input: RegisterInput): Promise<AuthResult> {
     const existing = await UserModel.findOne({ email: input.email }).exec();
     if (existing) throw AppError.conflict('Email is already registered');
 
     const passwordHash = await hashPassword(input.password);
+    // Self-registration always creates a regular user; admins are seeded/promoted.
     const user = await UserModel.create({
       name: input.name,
       email: input.email,
       passwordHash,
+      role: 'user',
     });
 
-    return { token: signToken({ sub: String(user._id), email: user.email }), user };
+    return issue(user);
   },
 
   async login(input: LoginInput): Promise<AuthResult> {
@@ -31,6 +40,6 @@ export const authService = {
     const ok = await verifyPassword(input.password, String(user.passwordHash));
     if (!ok) throw AppError.unauthorized('Invalid email or password');
 
-    return { token: signToken({ sub: String(user._id), email: user.email }), user };
+    return issue(user);
   },
 };

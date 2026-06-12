@@ -1,9 +1,11 @@
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { env } from '../../config/env';
+import type { UserRole } from './user.model';
 
 export interface JwtPayload {
   sub: string;
   email: string;
+  role: UserRole;
 }
 
 /** Sign a JWT for an authenticated user. */

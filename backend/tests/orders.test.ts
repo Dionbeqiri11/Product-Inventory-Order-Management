@@ -1,16 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { app, request, registerAndLogin, createProduct } from './helpers';
+import { app, request, registerAndLogin, createAdminAndLogin, createProduct } from './helpers';
 import { ProductModel } from '../src/api/products/product.model';
 
 describe('orders', () => {
-  let token: string;
+  let token: string; // regular customer placing orders
+  let adminToken: string; // admin seeding products
 
   beforeEach(async () => {
     token = await registerAndLogin();
+    adminToken = await createAdminAndLogin();
   });
 
   it('creates an order and decrements stock', async () => {
-    const { id } = await createProduct(token, { priceCents: 500, stock: 10 });
+    const { id } = await createProduct(adminToken, { priceCents: 500, stock: 10 });
 
     const res = await request(app)
       .post('/api/v1/orders')
@@ -26,7 +28,7 @@ describe('orders', () => {
   });
 
   it('rejects an order exceeding available stock with 409 and leaves stock intact', async () => {
-    const { id } = await createProduct(token, { stock: 2 });
+    const { id } = await createProduct(adminToken, { stock: 2 });
 
     const res = await request(app)
       .post('/api/v1/orders')
@@ -39,8 +41,8 @@ describe('orders', () => {
   });
 
   it('compensates (rolls back) earlier reservations when a later line fails', async () => {
-    const a = await createProduct(token, { sku: 'COMP-A', stock: 10 });
-    const b = await createProduct(token, { sku: 'COMP-B', stock: 1 });
+    const a = await createProduct(adminToken, { sku: 'COMP-A', stock: 10 });
+    const b = await createProduct(adminToken, { sku: 'COMP-B', stock: 1 });
 
     const res = await request(app)
       .post('/api/v1/orders')
@@ -61,7 +63,7 @@ describe('orders', () => {
   });
 
   it('does not oversell under concurrent orders (only one wins for the last unit)', async () => {
-    const { id } = await createProduct(token, { sku: 'RACE-1', stock: 1 });
+    const { id } = await createProduct(adminToken, { sku: 'RACE-1', stock: 1 });
     const ATTEMPTS = 12;
 
     const results = await Promise.all(
@@ -85,7 +87,7 @@ describe('orders', () => {
   });
 
   it('lists only the authenticated user\'s orders', async () => {
-    const { id } = await createProduct(token, { stock: 10 });
+    const { id } = await createProduct(adminToken, { stock: 10 });
     await request(app)
       .post('/api/v1/orders')
       .set('Authorization', `Bearer ${token}`)

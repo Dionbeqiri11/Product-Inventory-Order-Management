@@ -2,6 +2,7 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { logger } from './config/logger';
 import { connectDatabase, disconnectDatabase } from './config/database';
+import { seedAdmin } from './api/auth/seedAdmin';
 
 /**
  * Server bootstrap: connect to the database, start listening, and wire up
@@ -9,6 +10,7 @@ import { connectDatabase, disconnectDatabase } from './config/database';
  */
 async function bootstrap(): Promise<void> {
   await connectDatabase(env.MONGO_URI);
+  await seedAdmin();
 
   const app = createApp();
   const server = app.listen(env.PORT, () => {

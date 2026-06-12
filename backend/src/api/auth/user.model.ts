@@ -1,10 +1,13 @@
 import { Schema, model, type HydratedDocument } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+export type UserRole = 'user' | 'admin';
+
 export interface IUser {
   email: string;
   passwordHash: string;
   name: string;
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +24,7 @@ const userSchema = new Schema<IUser>(
     // Stored as a bcrypt hash; never selected by default to avoid leaking it.
     passwordHash: { type: String, required: true, select: false },
     name: { type: String, required: true, trim: true },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
   },
   {
     timestamps: true,

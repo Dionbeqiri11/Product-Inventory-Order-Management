@@ -14,6 +14,10 @@ const envSchema = z.object({
   LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),
+  // Optional bootstrap admin, seeded on startup if both are provided.
+  ADMIN_EMAIL: z.string().email().optional(),
+  ADMIN_PASSWORD: z.string().min(8).optional(),
+  ADMIN_NAME: z.string().default('Administrator'),
 });
 
 const parsed = envSchema.safeParse(process.env);

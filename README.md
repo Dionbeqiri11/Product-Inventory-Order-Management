@@ -128,6 +128,12 @@ remaining unit and asserts **exactly one** succeeds while stock lands at `0`.
 
 Base URL: `/api/v1`. Authenticated requests send `Authorization: Bearer <token>`.
 
+> **Roles.** Users have a `role` of `user` (default for self-registration) or
+> `admin`. Only admins can create/update/delete products; any signed-in user can
+> browse products and place orders. A bootstrap admin is seeded on startup from
+> `ADMIN_EMAIL` / `ADMIN_PASSWORD` (defaults `admin@example.com` / `admin12345`
+> in Docker). An existing user with that email is promoted to admin.
+
 ### Auth
 
 | Method | Path | Auth | Body | Description |
@@ -142,9 +148,9 @@ Base URL: `/api/v1`. Authenticated requests send `Authorization: Bearer <token>`
 | ------ | ---- | ---- | ---- | ----------- |
 | GET | `/products` | – | – | List products |
 | GET | `/products/:id` | – | – | Get one product |
-| POST | `/products` | ✅ | `{ name, sku, priceCents, stock, description? }` | Create |
-| PATCH | `/products/:id` | ✅ | partial product | Update |
-| DELETE | `/products/:id` | ✅ | – | Delete |
+| POST | `/products` | admin | `{ name, sku, priceCents, stock, description? }` | Create |
+| PATCH | `/products/:id` | admin | partial product | Update |
+| DELETE | `/products/:id` | admin | – | Delete |
 
 ### Orders
 
