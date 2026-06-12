@@ -11,7 +11,11 @@ export function Dashboard({ isAdmin = false }: { isAdmin?: boolean }) {
   const [error, setError] = useState<string | null>(null);
 
   async function refresh() {
-    const [p, o] = await Promise.all([api.listProducts(), api.listOrders()]);
+    // Admins manage the catalog and do not place or have orders.
+    const [p, o] = await Promise.all([
+      api.listProducts(),
+      isAdmin ? Promise.resolve([]) : api.listOrders(),
+    ]);
     setProducts(p);
     setOrders(o);
   }
@@ -57,7 +61,7 @@ export function Dashboard({ isAdmin = false }: { isAdmin?: boolean }) {
               <th>SKU</th>
               <th>Price</th>
               <th>Stock</th>
-              <th>Qty</th>
+              {!isAdmin && <th>Qty</th>}
             </tr>
           </thead>
           <tbody>
@@ -67,42 +71,48 @@ export function Dashboard({ isAdmin = false }: { isAdmin?: boolean }) {
                 <td>{p.sku}</td>
                 <td>{formatPrice(p.priceCents)}</td>
                 <td>{p.stock}</td>
-                <td>
-                  <input
-                    type="number"
-                    min={0}
-                    max={p.stock}
-                    value={cart[p.id] ?? 0}
-                    onChange={(e) => setQty(p.id, Number(e.target.value))}
-                    style={{ width: 64 }}
-                  />
-                </td>
+                {!isAdmin && (
+                  <td>
+                    <input
+                      type="number"
+                      min={0}
+                      max={p.stock}
+                      value={cart[p.id] ?? 0}
+                      onChange={(e) => setQty(p.id, Number(e.target.value))}
+                      style={{ width: 64 }}
+                    />
+                  </td>
+                )}
               </tr>
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={5}>No products yet — create one below.</td>
+                <td colSpan={isAdmin ? 4 : 5}>
+                  {isAdmin ? 'No products yet — add one below.' : 'No products available yet.'}
+                </td>
               </tr>
             )}
           </tbody>
         </table>
-        <button onClick={placeOrder}>Place order</button>
+        {!isAdmin && <button onClick={placeOrder}>Place order</button>}
       </section>
 
       {isAdmin && <CreateProduct onCreated={refresh} />}
 
-      <section className="card">
-        <h2>Your orders</h2>
-        {orders.length === 0 && <p>No orders yet.</p>}
-        <ul className="orders">
-          {orders.map((o) => (
-            <li key={o.id}>
-              <strong>{formatPrice(o.totalCents)}</strong> · {o.status} ·{' '}
-              {o.items.map((i) => `${i.quantity}× ${i.name}`).join(', ')}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {!isAdmin && (
+        <section className="card">
+          <h2>Your orders</h2>
+          {orders.length === 0 && <p>No orders yet.</p>}
+          <ul className="orders">
+            {orders.map((o) => (
+              <li key={o.id}>
+                <strong>{formatPrice(o.totalCents)}</strong> · {o.status} ·{' '}
+                {o.items.map((i) => `${i.quantity}× ${i.name}`).join(', ')}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
