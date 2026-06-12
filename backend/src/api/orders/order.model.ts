@@ -34,7 +34,8 @@ const orderItemSchema = new Schema<IOrderItem>(
 
 const orderSchema = new Schema<IOrder>(
   {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    // Indexed: every order list/lookup is scoped by user.
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     items: { type: [orderItemSchema], required: true, validate: (v: unknown[]) => v.length > 0 },
     totalCents: { type: Number, required: true, min: 0 },
     status: { type: String, enum: ['confirmed', 'cancelled'], default: 'confirmed' },
