@@ -3,25 +3,32 @@ import { api } from '../api';
 import { formatPrice } from '../format';
 import type { Order, Product } from '../types';
 
+const PAGE_SIZE = 10;
+
 export function Dashboard({ isAdmin = false }: { isAdmin?: boolean }) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cart, setCart] = useState<Record<string, number>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function refresh() {
+  async function refresh(targetPage = page) {
     // Admins manage the catalog and do not place or have orders.
     const [p, o] = await Promise.all([
-      api.listProducts(),
-      isAdmin ? Promise.resolve([]) : api.listOrders(),
+      api.listProducts(targetPage, PAGE_SIZE),
+      isAdmin ? Promise.resolve(null) : api.listOrders(1, PAGE_SIZE),
     ]);
-    setProducts(p);
-    setOrders(o);
+    setProducts(p.data);
+    setTotalPages(p.totalPages);
+    setPage(p.page);
+    if (o) setOrders(o.data);
   }
 
   useEffect(() => {
-    refresh().catch((e) => setError(e instanceof Error ? e.message : 'Failed to load'));
+    refresh(1).catch((e) => setError(e instanceof Error ? e.message : 'Failed to load'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function setQty(id: string, qty: number) {
@@ -94,6 +101,17 @@ export function Dashboard({ isAdmin = false }: { isAdmin?: boolean }) {
             )}
           </tbody>
         </table>
+        <div className="pagination">
+          <button onClick={() => refresh(page - 1)} disabled={page <= 1}>
+            Prev
+          </button>
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <button onClick={() => refresh(page + 1)} disabled={page >= totalPages}>
+            Next
+          </button>
+        </div>
         {!isAdmin && <button onClick={placeOrder}>Place order</button>}
       </section>
 

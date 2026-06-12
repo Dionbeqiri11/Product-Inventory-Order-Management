@@ -1,4 +1,4 @@
-import type { AuthUser, Order, Product } from './types';
+import type { AuthUser, Order, Paginated, Product } from './types';
 
 const BASE = '/api/v1';
 
@@ -52,14 +52,14 @@ export const api = {
       body: JSON.stringify(input),
     });
   },
-  listProducts() {
-    return request<Product[]>('/products');
+  listProducts(page = 1, limit = 10) {
+    return request<Paginated<Product>>(`/products?page=${page}&limit=${limit}`);
   },
   createProduct(input: { name: string; sku: string; priceCents: number; stock: number }) {
     return request<Product>('/products', { method: 'POST', body: JSON.stringify(input) });
   },
-  listOrders() {
-    return request<Order[]>('/orders');
+  listOrders(page = 1, limit = 10) {
+    return request<Paginated<Order>>(`/orders?page=${page}&limit=${limit}`);
   },
   createOrder(items: { productId: string; quantity: number }[]) {
     return request<Order>('/orders', { method: 'POST', body: JSON.stringify({ items }) });

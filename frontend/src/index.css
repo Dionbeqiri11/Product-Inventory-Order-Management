@@ -140,3 +140,21 @@ td {
   margin-top: 1rem;
   font-size: 0.875rem;
 }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.pagination button {
+  background: #eef2ff;
+  color: #2563eb;
+}
+
+.pagination button:disabled {
+  background: #f1f3f5;
+  color: #9aa3af;
+}
