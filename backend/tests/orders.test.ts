@@ -108,11 +108,12 @@ describe('orders', () => {
     const otherToken = await registerAndLogin({ email: 'other@example.com' });
 
     const mine = await request(app).get('/api/v1/orders').set('Authorization', `Bearer ${token}`);
-    expect(mine.body).toHaveLength(1);
+    expect(mine.body.data).toHaveLength(1);
+    expect(mine.body.total).toBe(1);
 
     const theirs = await request(app)
       .get('/api/v1/orders')
       .set('Authorization', `Bearer ${otherToken}`);
-    expect(theirs.body).toHaveLength(0);
+    expect(theirs.body.data).toHaveLength(0);
   });
 });

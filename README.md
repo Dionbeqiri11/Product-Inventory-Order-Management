@@ -147,7 +147,7 @@ Base URL: `/api/v1`. Authenticated requests send `Authorization: Bearer <token>`
 
 | Method | Path | Auth | Body | Description |
 | ------ | ---- | ---- | ---- | ----------- |
-| GET | `/products` | – | – | List products |
+| GET | `/products` | – | `?page&limit` | List products (paginated) |
 | GET | `/products/:id` | – | – | Get one product |
 | POST | `/products` | admin | `{ name, sku, priceCents, stock, description? }` | Create |
 | PATCH | `/products/:id` | admin | partial product | Update |
@@ -158,11 +158,18 @@ Base URL: `/api/v1`. Authenticated requests send `Authorization: Bearer <token>`
 | Method | Path | Auth | Body | Description |
 | ------ | ---- | ---- | ---- | ----------- |
 | POST | `/orders` | user | `{ items: [{ productId, quantity }] }` | Place order (atomic reservation); admins are forbidden |
-| GET | `/orders` | ✅ | – | List the authenticated user's orders |
+| GET | `/orders` | ✅ | `?page&limit` | List the user's orders (paginated) |
 | GET | `/orders/:id` | ✅ | – | Get one of the user's orders |
 
 Prices are stored and returned as integer **cents** (`priceCents`, `totalCents`,
 `unitPriceCents`) to avoid floating-point rounding errors.
+
+**Pagination.** List endpoints accept `page` (1-based, default `1`) and `limit`
+(default `20`, max `100`) and return an envelope:
+
+```json
+{ "data": [ ... ], "page": 1, "limit": 20, "total": 42, "totalPages": 3 }
+```
 
 **Example — place an order**
 

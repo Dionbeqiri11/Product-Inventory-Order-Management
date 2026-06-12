@@ -10,8 +10,12 @@ export const productRepository = {
     return ProductModel.create(data);
   },
 
-  findAll(): Promise<ProductDocument[]> {
-    return ProductModel.find().sort({ createdAt: -1 }).exec();
+  findPage(skip: number, limit: number): Promise<ProductDocument[]> {
+    return ProductModel.find().sort({ createdAt: -1 }).skip(skip).limit(limit).exec();
+  },
+
+  count(): Promise<number> {
+    return ProductModel.countDocuments().exec();
   },
 
   findById(id: string): Promise<ProductDocument | null> {

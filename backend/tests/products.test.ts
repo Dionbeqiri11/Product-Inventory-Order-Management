@@ -46,8 +46,26 @@ describe('products', () => {
 
     const list = await request(app).get('/api/v1/products');
     expect(list.status).toBe(200);
-    expect(list.body).toHaveLength(1);
-    expect(list.body[0].id).toBe(id);
+    expect(list.body.data).toHaveLength(1);
+    expect(list.body.total).toBe(1);
+    expect(list.body.data[0].id).toBe(id);
+  });
+
+  it('paginates the product listing', async () => {
+    for (const i of [1, 2, 3]) {
+      await createProduct(adminToken, { sku: `PAGE-${i}` });
+    }
+
+    const page1 = await request(app).get('/api/v1/products?page=1&limit=2');
+    expect(page1.status).toBe(200);
+    expect(page1.body.data).toHaveLength(2);
+    expect(page1.body.total).toBe(3);
+    expect(page1.body.totalPages).toBe(2);
+    expect(page1.body.page).toBe(1);
+
+    const page2 = await request(app).get('/api/v1/products?page=2&limit=2');
+    expect(page2.body.data).toHaveLength(1);
+    expect(page2.body.page).toBe(2);
   });
 
   it('validates the create payload', async () => {

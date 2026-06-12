@@ -1,4 +1,5 @@
 import { AppError } from '../../utils/AppError';
+import { buildPage, skipFor, type Paginated, type PaginationParams } from '../../utils/pagination';
 import { productRepository } from './product.repository';
 import type { CreateProductInput, UpdateProductInput } from './product.schemas';
 import type { ProductDocument } from './product.model';
@@ -12,8 +13,12 @@ export const productService = {
     return productRepository.create(input);
   },
 
-  list(): Promise<ProductDocument[]> {
-    return productRepository.findAll();
+  async list(params: PaginationParams): Promise<Paginated<ProductDocument>> {
+    const [data, total] = await Promise.all([
+      productRepository.findPage(skipFor(params), params.limit),
+      productRepository.count(),
+    ]);
+    return buildPage(data, total, params);
   },
 
   async getById(id: string): Promise<ProductDocument> {

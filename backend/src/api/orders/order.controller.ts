@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../../utils/AppError';
+import { paginationSchema } from '../../utils/pagination';
 import { orderService } from './order.service';
 
 /** Pull the authenticated user id from the JWT payload set by authenticate. */
@@ -15,7 +16,8 @@ export const orderController = {
   },
 
   async list(req: Request, res: Response): Promise<void> {
-    const orders = await orderService.list(userId(req));
+    const params = paginationSchema.parse(req.query);
+    const orders = await orderService.list(userId(req), params);
     res.json(orders);
   },
 

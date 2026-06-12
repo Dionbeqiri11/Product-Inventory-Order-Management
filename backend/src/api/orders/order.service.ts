@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { AppError } from '../../utils/AppError';
+import { buildPage, skipFor, type Paginated, type PaginationParams } from '../../utils/pagination';
 import { productRepository } from '../products/product.repository';
 import { orderRepository } from './order.repository';
 import type { CreateOrderInput } from './order.schemas';
@@ -62,8 +63,12 @@ export const orderService = {
     }
   },
 
-  list(userId: string): Promise<OrderDocument[]> {
-    return orderRepository.findByUser(userId);
+  async list(userId: string, params: PaginationParams): Promise<Paginated<OrderDocument>> {
+    const [data, total] = await Promise.all([
+      orderRepository.findPageByUser(userId, skipFor(params), params.limit),
+      orderRepository.countByUser(userId),
+    ]);
+    return buildPage(data, total, params);
   },
 
   async getById(userId: string, id: string): Promise<OrderDocument> {

@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { paginationSchema } from '../../utils/pagination';
 import { productService } from './product.service';
 
 /**
@@ -12,8 +13,9 @@ export const productController = {
     res.status(201).json(product);
   },
 
-  async list(_req: Request, res: Response): Promise<void> {
-    const products = await productService.list();
+  async list(req: Request, res: Response): Promise<void> {
+    const params = paginationSchema.parse(req.query);
+    const products = await productService.list(params);
     res.json(products);
   },
 
