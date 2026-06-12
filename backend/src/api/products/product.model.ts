@@ -1,6 +1,16 @@
-import { Schema, model, type InferSchemaType, type HydratedDocument } from 'mongoose';
+import { Schema, model, type HydratedDocument } from 'mongoose';
 
-const productSchema = new Schema(
+export interface IProduct {
+  name: string;
+  sku: string;
+  description: string;
+  priceCents: number;
+  stock: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const productSchema = new Schema<IProduct>(
   {
     name: { type: String, required: true, trim: true },
     sku: { type: String, required: true, unique: true, trim: true, uppercase: true },
@@ -23,7 +33,6 @@ const productSchema = new Schema(
   },
 );
 
-export type Product = InferSchemaType<typeof productSchema>;
-export type ProductDocument = HydratedDocument<Product>;
+export type ProductDocument = HydratedDocument<IProduct>;
 
-export const ProductModel = model('Product', productSchema);
+export const ProductModel = model<IProduct>('Product', productSchema);
